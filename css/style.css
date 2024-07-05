@@ -1,0 +1,72 @@
+body {
+  font-family: fantasy !important;
+}
+#playerform {
+  background-image: url("../img/bg.jpg");
+}
+.input-group-addon:first-child {
+  background-color: lavender !important; 
+}
+#btnhelp {
+  position: absolute;
+  display: none;  
+  background-color: green;
+  border-color: orange;  
+}
+#btngamestart {
+  position: absolute;
+  display: none;  
+  background-color: green;
+  border-color: orange;  
+}
+#btncountry1 {
+  position: absolute;
+  display: none;
+  background-color: green;
+  border-color: orange;  
+}
+#btncountry2 {
+  position: absolute;
+  display: none;
+  background-color: yellow;
+  border-color: blue;
+  color: green;  
+    
+}
+#btncountry3 {
+  position: absolute;
+  display: none;
+  background-color: black;
+  border-color: red;
+  color: white;    
+}
+#btnspin {
+  position: absolute;
+  display: none;  
+}
+#btnhome {
+  position: absolute;
+  display: none;  
+}
+#btncontinue {
+  position: absolute;
+  display: none;  
+}
+#iconhome {
+  position: absolute;
+  display: none; 
+  top:2px;
+  left: 4px;  
+}
+#volumeon {
+  position: absolute;
+  display: none; 
+  top:2px;     
+}
+#volumeoff {
+  position: absolute;
+  display: none; 
+  top:2px;
+  left: 4px;   
+}
+

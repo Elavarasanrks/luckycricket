@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Lucky Cricket</title>
+<link rel="stylesheet" href="css/bootstrap.min.css">
+<link rel="stylesheet" href="css/font-awesome.min.css">
+<link rel="stylesheet" href="css/style.css">
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+</head>
+
+<body style="background-color: #000;line-height: 0;margin: 0;padding: 0;">
+	<img style="display: none;" src="img/bg.jpg" id="homebg">
+	<img style="display: none;" src="img/bookimg.png" id="bookimg">	
+	<img style="display: none;" src="img/siximg.png" id="siximg">
+	<img style="display: none;" src="img/fourimg.png" id="fourimg">
+	<img style="display: none;" src="img/outimg.png" id="outimg">
+	<img style="display: none;" src="img/wonimg.png" id="wonimg">
+	<img style="display: none;" src="img/lossimg.png" id="lossimg">
+  <img style="display: none;" src="img/drawimg.png" id="drawimg">
+  <audio id="sixAudio">
+    <source src="commentary.mp3" type="audio/ogg"> 
+  </audio>
+  <div id="playerform" style="display: none;margin: 0;padding: 0;">
+    
+  </div>
+
+<button type="button" id="btnhelp" class="btn btn-info btn-lg" data-toggle="modal" data-target="#help">Instructions</button>
+<button type="button" id="btngamestart" class="btn btn-info btn-lg" onclick="btnStart()">Start</button>
+<button type="button" id="btncountry1" class="btn btn-info btn-lg" onclick="btncountry1()">India</button>
+<button type="button" id="btncountry2" class="btn btn-info btn-lg" onclick="btncountry2()">Australia</button>
+<button type="button" id="btncountry3" class="btn btn-info btn-lg" onclick="btncountry3()">Newzeland</button>
+<button type="button" id="btnspin" class="btn btn-info btn-lg" onclick="btnPlay()">Spin</button>
+<button type="button" id="btnhome" class="btn btn-info btn-lg" onclick="btnhome()">Home</button>
+<button type="button" id="btncontinue" class="btn btn-info btn-lg" onclick="btncontinue()">Continue</button>
+<button id="iconhome" type="button" class="btn btn-default btn-sm" data-toggle="modal" data-target="#btnconfirm">
+  <span class="glyphicon glyphicon-home"></span>
+</button>
+<button id="volumeon" type="button" class="btn btn-default btn-sm" onclick="volumeoff()">
+  <span class="glyphicon glyphicon-volume-up"></span>
+</button>
+<button id="volumeoff" type="button" class="btn btn-default btn-sm" onclick="volumeon()">
+  <span class="glyphicon glyphicon-volume-off"></span>
+</button>
+
+
+
+
+<!-- Modal -->
+<div id="help" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Instructions</h4>
+      </div>
+      <div class="modal-body" style="line-height: 20px;">
+        <p>Click the Start button to choose the country.</p>
+        <p>Once click the Country button, you will be navigated to update the players name of your team.</p>
+        <p>Please choose any other country to change the players name.</p>
+        <p>Once click the Submit button, you wil be redirected to game page.</p>
+        <p>Your selected team will be displayed on right side.</p>
+        <p>Click the Spin button to play the Lucky Cricket.</p>
+        <p>There is no over limit in this game.</p>
+        <p>One player can play the game untill the result is 0.</p>
+        <p>The current player is highlighted by violet color on the player name's background.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="btnconfirm" class="modal fade">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <!-- dialog body -->
+          <div class="modal-body">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              Are you want to exit the game?
+          </div>
+          <!-- dialog buttons -->
+          <div class="modal-footer"><button onclick="btnhome()" data-dismiss="modal" type="button" class="btn btn-primary">Yes</button></div>
+      </div>
+  </div>
+</div>
+</body>
+</html>
+<script type="text/javascript" src="cordova.js"></script> 
+<script>
+  
+var app = {
+    // Application Constructor
+    initialize: function() {
+        this.bindEvents();
+    },
+    // Bind Event Listeners
+    //
+    // Bind any events that are required on startup. Common events are:
+    // 'load', 'deviceready', 'offline', and 'online'.
+    bindEvents: function() {
+        document.addEventListener('deviceready', onDeviceReady(), false);
+    },   
+};
+
+
+if (typeof(localStorage.highestscore) == "undefined") {  
+  localStorage.highestscore = 0;
+}
+
+
+//alert(localStorage['level_'+1]);
+var num;
+var centerX,centerY,w,h;   
+w  = window.innerWidth;
+h = window.innerHeight;
+
+var Wwidth = w;
+var Wheight = h;
+
+var halfwidth = Wwidth/2;
+var leftteamwidth = (60/100)*halfwidth;
+//alert(leftteamwidth);
+var pbgwidthlength = (60/100)*leftteamwidth;
+var sbgwidthlength = leftteamwidth - pbgwidthlength;
+var left_pwidth = pbgwidthlength/2;
+var left_scorepoint = pbgwidthlength + (sbgwidthlength/1.5);
+
+var circlestartpoint = leftteamwidth;
+var circlelength = halfwidth - leftteamwidth;
+
+//alert(halfwidth)
+//alert(leftteamwidth)
+//alert(circlelength)
+
+
+var rightteam_startpoint = leftteamwidth+ (circlelength*2)-10;
+//var rightteam_pbgwidthlength = pbgwidthlength;
+var rightteam_sbgwidthlength = rightteam_startpoint+pbgwidthlength+10;
+
+var rigth_ppoint = rightteam_startpoint + (pbgwidthlength/1.5) - 10;
+
+var rigth_scorepoint = rightteam_startpoint + pbgwidthlength + (sbgwidthlength/1.5);
+//alert(rigth_scorepoint)
+
+var yourteamID = 1;
+var opponentteamID = 1;
+
+var pointer = 0;
+var sixAudio = document.getElementById("sixAudio");
+localStorage['volume'] = 1;
+
+var canvas,ctx;
+var team1 = [
+			 {'team':1,'name':'Player01','score':0,'pwidth':left_pwidth,'height':95,'pbgwidth':0,'bgheight':80,'swidth':left_scorepoint,'sbgwidth':pbgwidthlength + 10},
+			 {'team':1,'name':'Player02','score':0,'pwidth':left_pwidth,'height':125,'pbgwidth':0,'bgheight':110,'swidth':left_scorepoint,'sbgwidth':pbgwidthlength + 10},
+			 {'team':1,'name':'Player03','score':0,'pwidth':left_pwidth,'height':155,'pbgwidth':0,'bgheight':140,'swidth':left_scorepoint,'sbgwidth':pbgwidthlength + 10},
+			 {'team':1,'name':'Player04','score':0,'pwidth':left_pwidth,'height':185,'pbgwidth':0,'bgheight':170,'swidth':left_scorepoint,'sbgwidth':pbgwidthlength + 10},
+			 {'team':1,'name':'Player05','score':0,'pwidth':left_pwidth,'height':215,'pbgwidth':0,'bgheight':200,'swidth':left_scorepoint,'sbgwidth':pbgwidthlength + 10},
+			 {'team':1,'name':'Player06','score':0,'pwidth':left_pwidth,'height':245,'pbgwidth':0,'bgheight':230,'swidth':left_scorepoint,'sbgwidth':pbgwidthlength + 10},
+			 {'team':1,'name':'Player07','score':0,'pwidth':left_pwidth,'height':275,'pbgwidth':0,'bgheight':260,'swidth':left_scorepoint,'sbgwidth':pbgwidthlength + 10},
+			 {'team':1,'name':'Player08','score':0,'pwidth':left_pwidth,'height':305,'pbgwidth':0,'bgheight':290,'swidth':left_scorepoint,'sbgwidth':pbgwidthlength + 10},
+			 {'team':1,'name':'Player09','score':0,'pwidth':left_pwidth,'height':335,'pbgwidth':0,'bgheight':320,'swidth':left_scorepoint,'sbgwidth':pbgwidthlength + 10},
+			 {'team':1,'name':'Player10','score':0,'pwidth':left_pwidth,'height':365,'pbgwidth':0,'bgheight':350,'swidth':left_scorepoint,'sbgwidth':pbgwidthlength + 10},
+			 {'team':1,'name':'Player11','score':0,'pwidth':left_pwidth,'height':395,'pbgwidth':0,'bgheight':380,'swidth':left_scorepoint,'sbgwidth':pbgwidthlength + 10},
+			];
+
+var team2 = [
+	{'team':2,'name':'Player01','score':0,'status':0,'pwidth':rigth_ppoint,'height':95,'pbgwidth':rightteam_startpoint,'bgheight':80,'swidth':rigth_scorepoint,'sbgwidth':rightteam_sbgwidthlength},
+	{'team':2,'name':'Player02','score':0,'status':0,'pwidth':rigth_ppoint,'height':125,'pbgwidth':rightteam_startpoint,'bgheight':110,'swidth':rigth_scorepoint,'sbgwidth':rightteam_sbgwidthlength},
+	{'team':2,'name':'Player03','score':0,'status':0,'pwidth':rigth_ppoint,'height':155,'pbgwidth':rightteam_startpoint,'bgheight':140,'swidth':rigth_scorepoint,'sbgwidth':rightteam_sbgwidthlength},
+	{'team':2,'name':'Player04','score':0,'status':0,'pwidth':rigth_ppoint,'height':185,'pbgwidth':rightteam_startpoint,'bgheight':170,'swidth':rigth_scorepoint,'sbgwidth':rightteam_sbgwidthlength},
+	{'team':2,'name':'Player05','score':0,'status':0,'pwidth':rigth_ppoint,'height':215,'pbgwidth':rightteam_startpoint,'bgheight':200,'swidth':rigth_scorepoint,'sbgwidth':rightteam_sbgwidthlength},
+	{'team':2,'name':'Player06','score':0,'status':0,'pwidth':rigth_ppoint,'height':245,'pbgwidth':rightteam_startpoint,'bgheight':230,'swidth':rigth_scorepoint,'sbgwidth':rightteam_sbgwidthlength},
+	{'team':2,'name':'Player07','score':0,'status':0,'pwidth':rigth_ppoint,'height':275,'pbgwidth':rightteam_startpoint,'bgheight':260,'swidth':rigth_scorepoint,'sbgwidth':rightteam_sbgwidthlength},
+	{'team':2,'name':'Player08','score':0,'status':0,'pwidth':rigth_ppoint,'height':305,'pbgwidth':rightteam_startpoint,'bgheight':290,'swidth':rigth_scorepoint,'sbgwidth':rightteam_sbgwidthlength},
+	{'team':2,'name':'Player09','score':0,'status':0,'pwidth':rigth_ppoint,'height':335,'pbgwidth':rightteam_startpoint,'bgheight':320,'swidth':rigth_scorepoint,'sbgwidth':rightteam_sbgwidthlength},
+	{'team':2,'name':'Player10','score':0,'status':0,'pwidth':rigth_ppoint,'height':365,'pbgwidth':rightteam_startpoint,'bgheight':350,'swidth':rigth_scorepoint,'sbgwidth':rightteam_sbgwidthlength},
+	{'team':2,'name':'Player11','score':0,'status':0,'pwidth':rigth_ppoint,'height':395,'pbgwidth':rightteam_startpoint,'bgheight':380,'swidth':rigth_scorepoint,'sbgwidth':rightteam_sbgwidthlength},
+];
+
+var country1 = [
+  {'name':'Drav','index':1},
+  {'name':'Sach','index':1},
+  {'name':'Gang','index':1},
+  {'name':'Shew','index':1},
+  {'name':'Yova','index':1},
+  {'name':'Dohn','index':1},
+  {'name':'Gowt','index':1},
+  {'name':'Harb','index':1},
+  {'name':'Agga','index':1},
+  {'name':'Aswi','index':1},
+  {'name':'Issa','index':1},
+  
+];
+var country2 = [
+  {'name':'Stew','index':2},
+  {'name':'Rick','index':2},
+  {'name':'Hidd','index':2},
+  {'name':'Wast','index':2},
+  {'name':'Smit','index':2},
+  {'name':'Symo','index':2},
+  {'name':'Clrk','index':2},
+  {'name':'Husy','index':2},
+  {'name':'Warn','index':2},
+  {'name':'Flem','index':2},
+  {'name':'Leei','index':2},
+  
+];
+var country3 = [
+  {'name':'Vict','index':3},
+  {'name':'NMcu','index':3},
+  {'name':'Tylo','index':3},
+  {'name':'Gupt','index':3},
+  {'name':'Braa','index':3},
+  {'name':'Frann','index':3},
+  {'name':'sout','index':3},
+  {'name':'Bout','index':3},
+  {'name':'Andr','index':3},
+  {'name':'Mill','index':3},
+  {'name':'Will','index':3},
+  
+];
+var team1str = [
+	{
+	'teamname':'Computer',
+	'teamnamewidth':left_pwidth,
+	'teamnameheight':60,
+	'totaltext':'Total',
+	'totaltextwidth':left_pwidth,
+	'totalscorewidth': pbgwidthlength + (sbgwidthlength)/2,
+	'headerbgcolor':"white",
+	'headerfont':"15px fantasy",
+	'scoretext':'Score',
+	'scorewidth':pbgwidthlength +10 + (sbgwidthlength)/2,
+	}
+	];
+var team2str = [
+	{
+	'teamname':'Your Team',
+	'teamnamewidth':rigth_ppoint,
+	'teamnameheight':60,
+	'totaltext':'Total',
+	'totaltextwidth':rigth_ppoint,
+	'totalscorewidth':rigth_scorepoint,
+	'headerbgcolor':"white",
+	'headerfont':"15px fantasy",
+	'scoretext':'Score',
+	'scorewidth':rigth_scorepoint
+	}
+	];
+
+if (typeof(localStorage['country1_name1']) != "undefined") {  
+  for(i=0;i<11;i++) {
+    country1[i]['name'] = localStorage['country'+country1[i]['index']+'_name'+i];     
+  }
+}
+
+if (typeof(localStorage['country2_name1']) != "undefined") {  
+  for(i=0;i<11;i++) {
+    country2[i]['name'] = localStorage['country'+country2[i]['index']+'_name'+i];     
+  }
+}
+if (typeof(localStorage['country3_name1']) != "undefined") {  
+  for(i=0;i<11;i++) {
+    country3[i]['name'] = localStorage['country'+country3[i]['index']+'_name'+i];     
+  }
+}
+
+
+  
+var arrHomeTitle,arrStart,arrheaderName;
+var arrheaderNamewidth,arrheaderNameheight;
+
+var starbtnwidth,starbtnheight,btnwitdh,btnheight,startextwidth,startextheight;
+var btnbgcolor,btnlinecolor;
+var btnsettingswidth,btnsettingsheight,btnhelpwidth,btnhelpheight;
+var menuX,menuY,menuwidth,menuheight;
+var menubtnbackwidth,menubtnbackheight;
+var logowidth,logoheight;
+var displaybgY;
+var arrPlay;
+var settime;
+
+var path_start = new Path2D();
+//const path_next = new Path2D();
+var path_play = new Path2D();
+var path2 = new Path2D();
+var path3 = new Path2D();
+var path_home = new Path2D();
+var path_continue = new Path2D();
+var path_country1 = new Path2D();
+var path_country2 = new Path2D();
+var path_country3 = new Path2D();
+
+
+
+var angle_colors = ["red", "orange", "yellow", "green", "blue", 
+                  "indigo", "violet"];
+var circle_index = [0, 4, 1, 6, 3, 2,5];
+                    
+
+var startAngle = 0;
+var arc = (2 * Math.PI) / 7;
+var spinTimeout = null;
+
+var spinArcStart = 10;
+var spinTime = 0;
+var spinTimeTotal = 0;
+
+var ctx;
+
+var arrow = 75;
+
+var spin_score;
+var output = '';
+
+ 
+
+
+
+//alert(output)
+
+//return;
+
+function onDeviceReady() {
+	if (!canvas) {
+
+    $('#playerform').css('weight', Wwidth);
+    $('#playerform').css('height', Wheight);
+    
+    canvas = document.createElement("canvas");
+    canvas.id = "canvas";
+    document.body.appendChild(canvas);
+    elemLeft = canvas.offsetLeft;
+    elemTop = canvas.offsetTop;	
+    canvas.width = w;
+    canvas.height = h;	
+    ctx = canvas.getContext("2d");
+    // Set Button width and height(Placement of button in window)
+    starbtnwidth = Math.round(canvas.width/2-60);
+    starbtnheight = Math.round(canvas.height/2);
+    startextwidth = Math.round(canvas.width/2);
+    startextheight = Math.round(canvas.height/2+25);
+    btnsettingswidth = Math.round(canvas.width/2+60);
+    btnsettingsheight = Math.round(canvas.height/2+60);
+    btnhelpwidth = Math.round(canvas.width/2+60);
+    btnhelpheight = Math.round(canvas.height/2+60);
+    btnwitdh = 120;
+    btnheight = 40;
+
+    // Set top menu bar width and height
+    menuX = 0;
+    menuY = 0;
+    menuwidth = 0;
+    menuheight = 40;
+    menubtnbackwidth = 30;
+    menubtnbackheight = 30;
+
+    logowidth = 100;
+    logoheight = 80;
+
+    // Header Team Name position
+
+    arrheaderNamewidth = 80;
+    arrheaderNameheight = 60;
+
+    btnbgcolor = "rgba(225,225,225,0.5)";
+    btnlinecolor = "#000000";
+    arrHomeTitle = {
+            'text' : 'Lucky Cricket',
+            'width' : canvas.width/2,
+            'height' : canvas.height/5,
+            'bcolor' : "seashell",
+            'textalign' : "center",
+            'font' : "30px  Impact, fantasy"
+          };
+    arrStart = {
+    'text' : 'Start',
+    'width' : startextwidth,
+    'height' : startextheight,
+    'bcolor' : "white",
+    'textalign' : "center",
+    'font' : "20px fantasy"
+    };
+    arrheaderName = {
+                  'text' : 'Team Name',
+            'width' : team1[0]['pwidth'],
+            'height' : arrheaderNameheight,
+            'bcolor' : "white",
+            'textalign' : "center",
+            'font' : "15px fantasy"
+
+          };
+    arrPlay = {
+      'text' : 'Spin',
+      'width' : canvas.width/2,
+      'height' : team1[10]['height']+35,
+      'bcolor' : "white",
+      'textalign' : "center",
+      'font' : "20px fantasy"
+
+    };
+    arrCountry1 = {
+                  'text' : 'India',
+            'width' : canvas.width/2,
+            'height' : canvas.height/3+30,
+            'bcolor' : "white",
+            'textalign' : "center",
+            'font' : "30px fantasy"
+          };
+    arrCountry2 = {
+            'text' : 'Australia',
+      'width' : canvas.width/2,
+      'height' : canvas.height/2+30,
+      'bcolor' : "green",
+      'textalign' : "center",
+      'font' : "30px fantasy"
+    };
+    arrCountry3 = {
+      'text' : 'Newzeland',
+      'width' : canvas.width/2,
+      'height' : canvas.height/1.5+30,
+      'bcolor' : "white",
+      'textalign' : "center",
+      'font' : "30px fantasy"
+    };
+    arrSelectText = {
+      'text' : 'Select Your Country',
+      'width' : canvas.width/2,
+      'height' : canvas.height/5,
+      'bcolor' : "seashell",
+      'textalign' : "center",
+      'font' : "30px fantasy"
+    };					
+    homeCanvas();
+  }
+}
+
+function drawBackground() {
+  var img = document.getElementById("homebg");
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+}
+
+function drawHomeLogo() {
+  var img = document.getElementById("bookimg");
+  ctx.drawImage(img, canvas.width/2-75, canvas.height/4, 150, 100);
+}
+
+function homeCanvas() { 
+  
+  drawBackground();
+  drawHomeLogo();  
+    
+  //drawText(arrHomeTitle , ctx);
+  
+  document.getElementById("volumeoff").style.left = canvas.width-40 +"px"; 
+  document.getElementById("volumeon").style.left = canvas.width-40 +"px"; 
+
+  document.getElementById("btngamestart").style.display = "block";
+  document.getElementById("btngamestart").style.top = starbtnheight +"px";
+  document.getElementById("btngamestart").style.left = starbtnwidth-10 +"px"; 
+  document.getElementById("btngamestart").style.width = (btnwitdh+20) +"px";  
+  document.getElementById("btnhelp").style.display = "block";
+  document.getElementById("btnhelp").style.top = canvas.height/1.5 +"px";
+  document.getElementById("btnhelp").style.left = starbtnwidth-10 +"px";
+  document.getElementById("btnhelp").style.width = (btnwitdh+20) +"px"; 
+
+}
+
+function btnStart() { 
+  document.getElementById("btnhelp").style.display = "none";
+  document.getElementById("btngamestart").style.display = "none";  
+	drawBackground();
+  drawCountrySelection();
+}
+
+function drawCountrySelection() {
+  // country1
+  document.getElementById("btncountry1").style.display = "block";
+  document.getElementById("btncountry1").style.top = canvas.height/3 +"px";
+  document.getElementById("btncountry1").style.left = canvas.width/2-60 +"px";
+  document.getElementById("btncountry1").style.width = btnwitdh +"px";
+
+  //country2
+  document.getElementById("btncountry2").style.display = "block";
+  document.getElementById("btncountry2").style.top = canvas.height/2 +"px";
+  document.getElementById("btncountry2").style.left = canvas.width/2-60 +"px";
+  document.getElementById("btncountry2").style.width = btnwitdh +"px";
+
+  //country3
+  document.getElementById("btncountry3").style.display = "block";
+  document.getElementById("btncountry3").style.top = canvas.height/1.5 +"px";
+  document.getElementById("btncountry3").style.left = canvas.width/2-60 +"px";
+  document.getElementById("btncountry3").style.width = btnwitdh +"px";
+}
+
+function btncountry1() {
+  document.getElementById("btnspin").style.backgroundColor = "green";
+  document.getElementById("btnspin").style.borderColor = "orange"; 
+  document.getElementById("btnspin").style.color = "white"; 
+  hideCountryBtn();
+  yourteamID = 1;
+  team2str[0]['teamname'] = 'India';  
+  output = playersform(country1);
+  $("#playerform").html(output);
+  $("#playerform").show();
+  $("#canvas").hide();
+  country1.forEach(chooseYPlayers);  
+  var cplayers = get_random([2,3]);
+  if(cplayers == 2) {
+    opponentteamID = 2;
+    team1str[0]['teamname'] = 'Australia';
+    country2.forEach(chooseCPlayers);
+  }
+  else {
+    opponentteamID = 3;
+    team1str[0]['teamname'] = 'Newzeland';
+    country3.forEach(chooseCPlayers);
+  }
+}
+
+function hideCountryBtn() {
+  document.getElementById("btncountry1").style.display = "none";
+  document.getElementById("btncountry2").style.display = "none";
+  document.getElementById("btncountry3").style.display = "none";  
+}
+
+
+function btncountry2() { 
+  document.getElementById("btnspin").style.backgroundColor = "yellow";
+  document.getElementById("btnspin").style.borderColor = "blue"; 
+  document.getElementById("btnspin").style.color = "green"; 
+  hideCountryBtn();
+  yourteamID = 2;
+  team2str[0]['teamname'] = 'Australia';  
+  output = playersform(country2);
+  $("#playerform").html(output);
+  $("#playerform").show();
+  $("#canvas").hide();  
+  country2.forEach(chooseYPlayers);
+  var cplayers = get_random([1,3]);
+  if(cplayers == 1) {
+    opponentteamID = 1;
+    team1str[0]['teamname'] = 'India';
+    country1.forEach(chooseCPlayers);
+  }
+  else {
+    opponentteamID = 3;
+    team1str[0]['teamname'] = 'Newzeland';
+    country3.forEach(chooseCPlayers);
+  }  
+}
+
+function btncountry3() {
+  document.getElementById("btnspin").style.backgroundColor = "black";
+  document.getElementById("btnspin").style.borderColor = "red"; 
+  document.getElementById("btnspin").style.color = "white";  
+  hideCountryBtn();
+  yourteamID = 3; 
+  team2str[0]['teamname'] = 'Newzeland';  
+  output = playersform(country3);
+  $("#playerform").html(output);
+  $("#playerform").show();
+  $("#canvas").hide();  	
+  country3.forEach(chooseYPlayers);
+  var cplayers = get_random([1,2]);
+  if(cplayers == 1) {
+    opponentteamID = 1;
+    team1str[0]['teamname'] = 'India';
+    country1.forEach(chooseCPlayers);
+  }
+  else {
+    opponentteamID = 2;
+    team1str[0]['teamname'] = 'Australia';
+    country2.forEach(chooseCPlayers);
+  } 
+}
+function volumeoff() {
+  document.getElementById("volumeoff").style.display = "block";
+  document.getElementById("volumeon").style.display = "none";
+  localStorage['volume'] = 0;
+  sixAudio.pause();
+  sixAudio.currentTime = 0;
+}
+
+function volumeon() {
+  document.getElementById("volumeoff").style.display = "none";
+  document.getElementById("volumeon").style.display = "block";
+  localStorage['volume'] = 1;
+}
+
+function playersform(country1) {
+  output = '';
+  output = output + '<div class="col-md-8"><div class="input-group"><span class="input-group-addon" style="font-size: 16px;color: navy;font-weight: bold;">';
+  output = output + ' Update your Team players</div>';
+  output = output + '<div class="container"><table class="table table-striped"><tbody><tr style="background-color:#ff758c;"><td colspan="1">';
+  output = output + '<form class="" id="players" method="POST">'
+  cindex = country1[0]['index'];
+  
+  for(i=0;i<country1.length;i++) {
+    name = country1[i]['name'];    
+    if (typeof(localStorage['country'+cindex+'_name'+i]) != "undefined") {
+		  name = localStorage['country'+cindex+'_name'+i];
+	  }
+    output = output + '<div class="col-md-8"><div class="input-group"><span class="input-group-addon">';
+    output = output + '<i class="glyphicon glyphicon-user"></i></span>';
+    output = output + '<input name="player[]" maxlength="7" placeholder="' + name + '" class="form-control" required="true" value="' + name + '" type="text">';
+    output = output + ' </div></div>';    
+  }
+  output = output + '<input type="hidden" id="countryID" name="countryID" value="' + cindex + '">';
+  output = output + '<div class="col-md-8"><div class="input-group"><span class="input-group-addon">';
+  output = output + '<button type="button" onclick="updatePlayers()" class="btn btn-primary">Submit</button></div>';
+  output = output + '</form>';
+  output = output + '</td></tr></tbody></table></div>';
+  
+  return output;
+}
+
+function updatePlayers() {
+  
+  var players = document.getElementsByName('player[]');
+  var countryID = document.getElementsByName('countryID')[0].value; 
+  for (var i = 0; i <players.length; i++) {    
+    if(players[i].value == '') {
+      return;
+    }     
+  }
+  for (var i = 0; i <players.length; i++) {   
+	  localStorage['country'+countryID+'_name'+i] = players[i].value;
+    team2[i]['name'] = players[i].value;
+    if(countryID == 1) {
+      country1[i]['name'] = players[i].value;
+    }
+    else if(countryID == 2) {
+      country2[i]['name'] = players[i].value;
+    }
+    else if(countryID == 3) {
+      country3[i]['name'] = players[i].value;
+    }
+  }
+  startGame();
+  return false;
+}
+
+get_random = function (list) {
+  return list[Math.floor((Math.random()*list.length))];
+} 
+
+
+function chooseYPlayers(item, index) {
+  team2[index]['name'] = item['name'];
+}
+
+function chooseCPlayers(item, index) {
+  team1[index]['name'] = item['name'];
+}
+
+
+function drawText(arrTitle , ctx) {	
+  ctx.fillStyle = arrTitle['bcolor'];
+  ctx.textAlign = arrTitle['textalign'];
+  ctx.font = arrTitle['font'];
+  ctx.fillText(arrTitle['text'], arrTitle['width'], arrTitle['height']);  
+}
+function drawBgcolor(x1,y1,x2,y2,bcolor,ctx) {
+  ctx.rect(x1,y1,x2,y2);
+  ctx.fillStyle = bcolor;	
+  ctx.fillRect(x1,y1,x2,y2);
+}
+function drawRect(xpath,ypath,bwidth,bheight,bcolor,lcolor,path,ctx) {
+  	
+  path.rect(xpath,ypath,bwidth,bheight);
+  path.closePath();
+  ctx.fillStyle = bcolor;
+  ctx.fill(path);
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = lcolor;
+  ctx.fillStyle = bcolor;
+  ctx.stroke(path);
+}
+
+function getXY(canvas, event){
+  const rect = canvas.getBoundingClientRect();
+  const y = event.clientY - rect.top;
+  const x = event.clientX - rect.left;
+  return {x:x, y:y};
+}
+
+
+
+function displayTeamHeader(teamstr) {	
+  drawHeaderText(teamstr , ctx);  
+}
+function displayTeamScoreHeader(teamstr) {	
+  drawHeaderScoreText(teamstr , ctx);
+}
+function drawHeaderText(teamstr) {	
+  ctx.fillStyle = teamstr['headerbgcolor'];
+  ctx.textAlign = "center";
+  ctx.font = teamstr['headerfont'];
+  ctx.fillText(teamstr['teamname'], teamstr['teamnamewidth'], teamstr['teamnameheight']);  
+}
+function drawHeaderScoreText(teamstr) {
+  ctx.fillStyle = teamstr['headerbgcolor'];
+  ctx.textAlign = "center";
+  ctx.font = teamstr['headerfont'];
+  ctx.fillText(teamstr['scoretext'], teamstr['scorewidth'], teamstr['teamnameheight']);  
+}
+
+
+function displayTeamList(team) {	
+	team.forEach(displayTeam);
+	team.forEach(displayScore);		
+	totalscore = totalScore(team);	
+	arrTotal = {
+	          'text' : 'Total',
+				   'width' : team[0]['pwidth'],
+				   'height' : team[10]['bgheight']+50,
+				   'bcolor' : "white",
+				   'textalign' : "center",
+				   'font' : "15px fantasy"
+
+        };
+        
+	arrScore = {
+		'text' : totalscore,
+		'width' : team[0]['swidth'],
+		'height' : team[10]['bgheight']+50,
+		'bcolor' : "white",
+		'textalign' : "center",
+		'font' : "15px fantasy"
+
+  };  
+  
+  var grad = ctx.createLinearGradient(team[0]['pbgwidth'], team[10]['bgheight'], team[0]['pbgwidth']+leftteamwidth+10, team[10]['bgheight']+40);
+  grad.addColorStop(0, "#DA4453");
+  grad.addColorStop(1, "#89216B");
+  // Filling with gradient
+  ctx.fillStyle = grad;
+  ctx.fillRect(team[0]['pbgwidth'], team[10]['bgheight']+25, leftteamwidth+10, 40);
+	
+	drawText(arrTotal , ctx);
+	drawText(arrScore , ctx);
+	
+}
+
+
+
+function totalScore(team) {
+  totalscore = 0;
+  for(i=0;i<team.length;i++) {
+    totalscore = totalscore + team[i]['score'];
+  }
+  return totalscore;
+}
+
+function btnPlay() {  
+  reDrawPlayboard();
+	spin();	
+}
+
+function manuallygenerateScore(item, index) {			
+	if(item['status'] == 0) {
+    pointer = index;	 
+	  item['score'] = item['score'] + spin_score;
+	  if(spin_score == 0) {
+		  item['status'] = 1;
+      pointer = pointer+1;
+	  }
+	  team1totalscore = totalScore(team1);
+	  team2totalscore = totalScore(team2);
+	  if(team2totalscore > team1totalscore) {
+		  team2.forEach(changeStatus);		
+	  }	  
+	  return true;	  
+	}
+		
+}
+function changeStatus(item, index) {	
+  item['status'] = 1;
+}
+
+function reDrawPlayboard() {
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	var img = document.getElementById("homebg");
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+	displayTeamHeader(team1str[0]);	
+	displayTeamScoreHeader(team1str[0]);
+	displayTeamList(team1);
+	displayTeamHeader(team2str[0]);
+	displayTeamScoreHeader(team2str[0]);
+	displayTeamList(team2);
+  //drawHeaderMenu();	
+  
+}
+
+function drawHeaderMenu() {
+  var grad = ctx.createLinearGradient(0, 0,canvas.width, 40);
+  
+  grad.addColorStop(0, "#EB5757");
+ // grad.addColorStop(0.5, "#c471ed");
+  grad.addColorStop(1, "#1CB5E0");
+  // Filling with gradient
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0, canvas.width, 40);
+  arrheadertext = {
+      'text' : 'Lucky Cricket',
+      'width' : canvas.width/2,
+      'height' : 26,
+      'bcolor' : "seashell",
+      'textalign' : "center",
+      'font' : "25px fantasy"
+  };
+  drawText(arrheadertext , ctx); 
+}
+
+function circleScore(score) {	
+	if(team2[10]['status'] == 0) {		
+    //drawRect((canvas.width/2)-40, team1[10]['height']+15, 80, 30,"rgb(158, 0, 158)","#000000",path_play,ctx);
+    //drawText(arrPlay , ctx);
+    drawSpinButton();
+    document.getElementById("iconhome").style.display = "block";    
+    if(score == 6) {
+      if(localStorage['volume'] == 1) {
+        sixAudio.play();
+      }
+	    var img = document.getElementById("siximg");
+	    ctx.drawImage(img, (canvas.width/2)-85, team1[0]['height']-50, 170, 150);	
+    }
+    else if(score == 4) {
+      if(localStorage['volume'] == 1) {
+        sixAudio.play();
+      }
+      var img = document.getElementById("fourimg");
+	    ctx.drawImage(img, (canvas.width/2)-85, team1[0]['height']-50, 170, 150);
+    }
+    else if(score == 0) {
+      if(localStorage['volume'] == 1) {
+        sixAudio.play();
+      }
+      var img = document.getElementById("outimg");
+	    ctx.drawImage(img, (canvas.width/2)-85, team1[0]['height']-50, 170, 150);
+    }
+  }
+}
+
+
+function displayTeam(item, index) { 
+  displaybgY = item['bgheight'];
+
+  if(item['team'] == 1) {
+    if(opponentteamID == 1) {
+      bgcolor = 'green';
+      bodercolor = 'orange';
+      color = 'white';
+    }
+    else if(opponentteamID == 2) {
+      bgcolor = 'yellow';
+      bodercolor = 'blue';
+      color = 'green';
+    }
+    else if(opponentteamID == 3) {
+      bgcolor = 'black';
+      bodercolor = 'red';
+      color = 'white';
+    }
+    
+  }
+  if(item['team'] == 2) {
+    if(yourteamID == 1) {
+      bgcolor = 'green';
+      bodercolor = 'orange';
+      color = 'white';
+    }
+    else if(yourteamID == 2) {
+      bgcolor = 'yellow';
+      bodercolor = 'blue';
+      color = 'green';
+    }
+    else if(yourteamID == 3) {
+      bgcolor = 'black';
+      bodercolor = 'red';
+      color = 'white';
+    }
+    
+  }
+  arrTitle = {
+	          'text' : item['name'],
+				   'width' : item['pwidth'],
+				   'height' : item['height'],
+				   'bcolor' : color,
+				   'textalign' : "center",
+				   'font' : "15px fantasy"
+
+				};
+  
+  
+  var grad = ctx.createLinearGradient(item['pbgwidth'], item['bgheight'],item['pbgwidth']+pbgwidthlength, item['bgheight']+20);
+  grad.addColorStop(1, bgcolor);
+  //grad.addColorStop(1, "#434343");
+  // Filling with gradient
+  ctx.strokeStyle = bodercolor;
+  ctx.stroke();
+  ctx.fillStyle = grad;
+  ctx.lineWidth   = 1;
+  ctx.fillRect(item['pbgwidth'], item['bgheight'], pbgwidthlength, 20);
+  ctx.strokeRect(item['pbgwidth'], item['bgheight'], pbgwidthlength, 20);
+  //ctx.rect(item['pbgwidth'], item['bgheight'], 80, 20);  
+//ctx.fill(); 
+  
+  highlightCurrentPlayer(index,item,item['pbgwidth'], item['bgheight'],item['pbgwidth']+pbgwidthlength, item['bgheight']+20)
+  drawText(arrTitle , ctx);   
+}
+
+
+function highlightCurrentPlayer(index,item,x1,y1,x2, y2) {
+  if(index == pointer && item['team'] == 2) {
+    var grad = ctx.createLinearGradient(x1,y1,x2, y2);
+    grad.addColorStop(1, "violet");
+    //grad.addColorStop(1, "#8DC26F");
+    // Filling with gradient
+    ctx.fillStyle = grad;
+    ctx.fillRect(x1,y1, pbgwidthlength, 20); 
+  }  
+}
+
+function displayScore(item, index) {
+  if(item['team'] == 1) {
+    if(opponentteamID == 1) {
+      bgcolor = 'green';
+      bodercolor = 'orange';
+      color = 'white';
+    }
+    else if(opponentteamID == 2) {
+      bgcolor = 'yellow';
+      bodercolor = 'blue';
+      color = 'green';
+    }
+    else if(opponentteamID == 3) {
+      bgcolor = 'black';
+      bodercolor = 'red';
+      color = 'white';
+    }
+    
+  }
+  if(item['team'] == 2) {
+    if(yourteamID == 1) {
+      bgcolor = 'green';
+      bodercolor = 'orange';
+      color = 'white';
+    }
+    else if(yourteamID == 2) {
+      bgcolor = 'yellow';
+      bodercolor = 'blue';
+      color = 'green';
+    }
+    else if(yourteamID == 3) {
+      bgcolor = 'black';
+      bodercolor = 'red';
+      color = 'white';
+    }
+    
+  }
+	arrTitle = {
+	          'text' : item['score'],
+				   'width' : item['swidth'],
+				   'height' : item['height'],
+				   'bcolor' : color,
+				   'textalign' : "center",
+				   'font' : "15px fantasy"
+
+				};
+  displaybgY = item['bgheight'];
+  var grad = ctx.createLinearGradient(item['sbgwidth'], item['bgheight'],item['sbgwidth']+sbgwidthlength, item['bgheight']+20);
+  grad.addColorStop(1, bgcolor);
+  //grad.addColorStop(1, "#434343");
+  // Filling with gradient
+  ctx.lineWidth   = 1;
+  ctx.strokeStyle = bodercolor;
+  ctx.stroke();
+  ctx.fillStyle = grad;
+  
+  ctx.fillRect(item['sbgwidth'], item['bgheight'], sbgwidthlength, 20);
+  ctx.strokeRect(item['sbgwidth'], item['bgheight'], sbgwidthlength, 20);
+  
+  //ctx.rect(item['sbgwidth'], item['bgheight'], 50, 20);
+  //ctx.stroke();
+  //ctx.fill();
+  drawText(arrTitle , ctx);
+}
+function testscore(item, index) {  
+  //alert(item['score']);
+  
+}
+
+function generateScore(item, index) {  
+  //alert(item['name']);
+  var sum = 0;
+  sum = randomScore(sum);
+  item['score'] = sum;
+}
+function randomScore(sum) {
+  $random_score = Math.floor(Math.random() * 7);
+  if($random_score != 0) {
+	sum = sum + $random_score;
+	return randomScore(sum);
+  }
+  else {
+    return sum;
+  }
+}
+
+function shuffleArray() {
+ 
+  var ctr = circle_index.length, temp, index;
+  while (ctr > 0) {
+    index = Math.floor(Math.random() * ctr);
+    ctr--;
+    temp = circle_index[ctr];
+    circle_index[ctr] = circle_index[index];
+    circle_index[index] = temp;
+    temp = angle_colors[ctr];
+    angle_colors[ctr] = angle_colors[index];
+    angle_colors[index] = temp;
+  }    
+}
+
+function draw() {
+  drawRouletteWheel();
+}
+  
+function drawRouletteWheel() {  
+//if (canvas.getContext) {
+  var outsideRadius = 0;
+  var textRadius = (55*circlelength)/100; 
+  var insideRadius = (75*circlelength)/100;  
+  var ccenter = canvas.width/2;
+  //ctx = canvas.getContext("2d");
+  // ctx.clearRect(team1[0]['sbgwidth']+70, team1[4]['height'], 100, 80);
+  ctx.strokeStyle = "black";
+  ctx.lineWidth = 2;
+  
+  ctx.font = 'bold 20px fantasy';
+  
+  for(var i = 0; i < 7; i++) {
+    var angle = startAngle + i * arc;
+    ctx.fillStyle = angle_colors[i];        
+    ctx.beginPath();
+    ctx.arc(ccenter, team1[5]['height'], outsideRadius, angle, angle + arc, false);
+    ctx.arc(ccenter, team1[5]['height'], insideRadius, angle + arc, angle, true);
+    ctx.stroke();
+    ctx.fill();        
+    ctx.save();
+    ctx.shadowOffsetX = -1;
+    ctx.shadowOffsetY = -1;
+    ctx.shadowBlur    = 0;
+    ctx.shadowColor   = "rgb(220,220,220)";
+    ctx.fillStyle = "black";
+    ctx.translate(ccenter + Math.cos(angle + arc / 2) * textRadius, team1[5]['height'] + Math.sin(angle + arc / 2) * textRadius);
+    ctx.rotate(angle + arc / 2 + Math.PI / 2);
+    var text = circle_index[i];
+    ctx.fillText(text, -ctx.measureText(text).width / 5, 15);
+    ctx.restore();
+  } 
+  
+  // Marquee
+  ctx.fillStyle = "White";
+  ctx.beginPath();
+  ctx.moveTo(ccenter - 4, team1[5]['height']+5 - (arrow + 5));
+  ctx.lineTo(ccenter + 4, team1[5]['height']+5 - (arrow + 5));
+  ctx.lineTo(ccenter + 4, team1[5]['height']+5 - (arrow - 5));
+  ctx.lineTo(ccenter + 9, team1[5]['height']+5 - (arrow - 5));
+  ctx.lineTo(ccenter + 0, team1[5]['height']+5 - (arrow - 13));
+  ctx.lineTo(ccenter - 9, team1[5]['height']+5 - (arrow - 5));
+  ctx.lineTo(ccenter - 4, team1[5]['height']+5 - (arrow - 5));
+  ctx.lineTo(ccenter - 4, team1[5]['height']+5 - (arrow + 5));
+  ctx.fill();
+//}
+}  
+function spin() {
+  if(localStorage['volume'] == 1) {
+    sixAudio.pause();
+    sixAudio.currentTime = 0;
+  }
+  shuffleArray();
+  document.getElementById("btnspin").style.display = "none";
+  document.getElementById("iconhome").style.display = "none";
+  spinAngleStart = Math.random() * 10 + 10;
+  spinTime = 0;
+  dynamicnum1 = Math.random() * (3000) + 15000;
+  dynamicnum2 = ((Math.random() * 5 - 1)+ 1) + (Math.random() * 100) + (Math.random() * 200);
+  spinTimeTotal = dynamicnum1 + dynamicnum2;  
+  rotateWheel();
+}  
+function rotateWheel() {
+  spinTime += 30;
+  if(spinTime >= spinTimeTotal) {
+    stopRotateWheel();
+    return;
+  }
+  var spinAngle = spinAngleStart - easeOut(spinTime, 0, spinAngleStart, spinTimeTotal);
+  startAngle += (spinAngle * Math.PI / 180);
+  drawRouletteWheel();
+  spinTimeout = setTimeout('rotateWheel()', 30);
+}  
+function stopRotateWheel() {
+  clearTimeout(spinTimeout);
+  var degrees = startAngle * 180 / Math.PI + 90;
+  var arcd = arc * 180 / Math.PI;
+  var index = Math.floor((360 - degrees % 360) / arcd);
+  ctx.save();    
+	var text = circle_index[index];
+	spin_score = circle_index[index];    
+	if(team2[10]['status'] == 0) {	
+		team2.some(manuallygenerateScore);
+	}	
+	team1totalscore = totalScore(team1);
+	team2totalscore = totalScore(team2);
+	reDrawPlayboard();
+	circleScore(spin_score);
+	draw();
+  var result = -2;
+	if(team2[10]['status'] == 1) {
+    if(team2totalscore > team1totalscore) {			
+      var img = document.getElementById("wonimg");
+      result = 1;
+    }
+    else if(team2totalscore == team1totalscore) {
+		  var img = document.getElementById("drawimg");
+      result = -1;
+	  }
+	  else {
+		  var img = document.getElementById("lossimg");
+      result = 0;
+	  }
+	  ctx.drawImage(img, (canvas.width/2)-90, team1[8]['height'], 180, 100);
+	  //canvas.removeEventListener('click',btnPlay, true);
+    document.getElementById("btnspin").style.display = "none";	  
+	  team1.forEach(clearIndex);	
+    team2.forEach(clearIndex);
+    if(localStorage.highestscore < team2totalscore) {
+      localStorage.highestscore = team2totalscore;
+    }
+  }	
+  if(team2totalscore > team1totalscore) {	  
+	  var img = document.getElementById("wonimg");
+    ctx.drawImage(img, circlestartpoint+(circlelength*2)-180, team1[8]['height'], 180, 100);
+    //canvas.removeEventListener('click',btnPlay, true);
+    document.getElementById("btnspin").style.display = "none";
+    result = 1;
+    team1.forEach(clearIndex);	
+    team2.forEach(clearIndex);  
+    team2.forEach(changeStatus);	
+    if(localStorage.highestscore < team2totalscore) {
+      localStorage.highestscore = team2totalscore;
+    }  
+  }
+  ctx.font = 'bold 50px fantasy';
+  ctx.fillText(spin_score, (canvas.width/2), team1[5]['height'] + 15);
+  ctx.restore();
+  if(result == 1) {    
+    drawHomeButton(); 
+  }
+  else if(result == 0 || result == -1) {   
+    drawContinueButton();    
+  }
+}
+function btnhome() {
+  document.getElementById("btnspin").style.display = "none";  
+  document.getElementById("btnhome").style.display = "none";	
+  document.getElementById("iconhome").style.display = "none";
+  document.getElementById("btnconfirm").style.display = "none";
+  hideVolumeBtn();
+  if(localStorage['volume'] == 1) {
+    sixAudio.pause();
+    sixAudio.currentTime = 0;
+  }
+  team1.forEach(clearIndex);	
+  team2.forEach(clearIndex);  
+  homeCanvas();
+}
+function btncontinue() { 
+  document.getElementById("btncontinue").style.display = "none";	
+  startGame(); 
+}
+function easeOut(t, b, c, d) {
+  var ts = (t/=d)*t;
+  var tc = ts*t;
+  return b+c*(tc + -3*ts + 3*t);
+}
+function clearIndex(item, index) {	
+  item['score'] = 0;
+  item['status'] = 0;    
+} 
+
+function startGame() { 
+  $("#playerform").hide();
+  $("#canvas").show();
+  showVolumeBtn();  
+  pointer = 0;
+	var img = document.getElementById("homebg");
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+	$random_score = Math.floor(Math.random() * 7);
+	team1.forEach(generateScore);
+	displayTeamHeader(team1str[0]);
+	displayTeamScoreHeader(team1str[0]);
+	displayTeamList(team1);
+	displayTeamHeader(team2str[0]);
+	displayTeamScoreHeader(team2str[0]);
+	displayTeamList(team2);
+  document.getElementById("iconhome").style.display = "block";
+  drawSpinButton();
+	draw();
+  //drawHeaderMenu();	  
+}
+function drawSpinButton() {
+  document.getElementById("btnspin").style.display = "block";
+  document.getElementById("btnspin").style.top =  team1[10]['height']+15 +"px";
+  document.getElementById("btnspin").style.left = (canvas.width/2)-60 +"px"; 
+  document.getElementById("btnspin").style.width = btnwitdh +"px"; 
+}
+function drawHomeButton() {
+  document.getElementById("btnhome").style.display = "block";
+  document.getElementById("btnhome").style.top =  team1[10]['height']+15 +"px";
+  document.getElementById("btnhome").style.left = (canvas.width/2)-60 +"px"; 
+  document.getElementById("btnhome").style.width = btnwitdh +"px"; 
+}
+function drawContinueButton() {
+  document.getElementById("btncontinue").style.display = "block";
+  document.getElementById("btncontinue").style.top =  team1[10]['height']+15 +"px";
+  document.getElementById("btncontinue").style.left = (canvas.width/2)-60 +"px"; 
+  document.getElementById("btncontinue").style.width = btnwitdh +"px"; 
+}
+function showVolumeBtn() {
+  if(localStorage['volume'] == 1) {
+    document.getElementById("volumeon").style.display = "block";
+  }
+  else if(localStorage['volume'] == 0) {
+    document.getElementById("volumeoff").style.display = "block";
+  }
+  else {
+    document.getElementById("volumeon").style.display = "block";
+  }
+}
+function hideVolumeBtn() {  
+  document.getElementById("volumeon").style.display = "none";
+  document.getElementById("volumeoff").style.display = "none";
+}
+
+app.initialize();
+</script>
+
